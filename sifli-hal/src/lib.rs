@@ -12,6 +12,8 @@ pub mod gpio;
 pub mod timer;
 pub mod time;
 pub mod pmu;
+pub mod syscfg;
+pub mod efuse;
 #[cfg(feature = "_time-driver")]
 pub mod time_driver;
 
