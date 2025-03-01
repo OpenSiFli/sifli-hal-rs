@@ -112,6 +112,17 @@ fn generate_rcc_impl(peripherals: &Peripherals, fieldsets: &BTreeMap<String, Fie
         if !peripheral.enable_reset {
             continue;
         }
+
+        // TODO: Is there a better way to handle this?
+        if peripheral.ignore_missing_enable_reset {
+            let peripheral_name_ident = format_ident!("{}", peripheral.name);
+            let impl_tokens = quote! {
+                impl crate::rcc::SealedRccEnableReset for crate::peripherals::#peripheral_name_ident {}
+                impl crate::rcc::RccEnableReset for crate::peripherals::#peripheral_name_ident {}
+            };
+            implementations.extend(impl_tokens);
+            continue;
+        }
         // Get field name (prefer rcc_field if available)
         let field_name = &peripheral.rcc_field.clone()
             .unwrap_or(peripheral.name.clone()).to_lowercase();

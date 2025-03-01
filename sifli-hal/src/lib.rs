@@ -12,6 +12,7 @@ pub mod gpio;
 pub mod timer;
 pub mod time;
 pub mod pmu;
+pub mod usart;
 #[cfg(feature = "_time-driver")]
 pub mod time_driver;
 
@@ -21,6 +22,30 @@ pub use embassy_hal_internal::{into_ref, Peripheral, PeripheralRef};
 pub use sifli_pac as pac;
 #[cfg(not(feature = "unstable-pac"))]
 pub(crate) use sifli_pac as pac;
+
+/// Operating modes for peripherals.
+pub mod mode {
+    trait SealedMode {}
+
+    /// Operating mode for a peripheral.
+    #[allow(private_bounds)]
+    pub trait Mode: SealedMode {}
+
+    macro_rules! impl_mode {
+        ($name:ident) => {
+            impl SealedMode for $name {}
+            impl Mode for $name {}
+        };
+    }
+
+    /// Blocking mode.
+    pub struct Blocking;
+    /// Async mode.
+    pub struct Async;
+
+    impl_mode!(Blocking);
+    impl_mode!(Async);
+}
 
 /// HAL configuration for SiFli
 pub mod config {
@@ -58,7 +83,6 @@ pub fn init(config: Config) -> Peripherals {
     let p = Peripherals::take();
 
     unsafe {
-        // rcc::Config::apply()
         config.rcc.apply();
 
         #[cfg(feature = "_time-driver")]

@@ -29,6 +29,8 @@ defmt = { version = "0.3.10", optional = true }
 log = { version = "0.4.14", optional = true }
 critical-section = "1.2.0"
 cfg-if = { version = "1", features = ["core"] }
+futures-util = { version = "0.3.31", default-features = false }
+nb = "1.0.0"
 
 # TODO: multicore critical-section impl
 cortex-m = { version = "0.7.7" }

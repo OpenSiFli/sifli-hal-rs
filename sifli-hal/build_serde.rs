@@ -97,8 +97,13 @@ pub struct Peripheral {
     pub name: String,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
+    /// disable if a peripheral does not has ENR RSTR Field
     #[serde(default = "default_true", skip_serializing_if = "is_true")]
     pub enable_reset: bool,
+    /// ignore missing enable reset field, impl `RccEnableReset` if enable or reset is none
+    /// TODO: Is there a better way to handle this?
+    #[serde(default = "default_false", skip_serializing_if = "is_false")]
+    pub ignore_missing_enable_reset: bool,
     pub rcc_field: Option<String>,
     pub clock: Option<String>,
     // #[serde(
@@ -121,8 +126,16 @@ fn default_true() -> bool {
     true
 }
 
+fn default_false() -> bool {
+    false
+}
+
 fn is_true(b: &bool) -> bool {
     *b
+}
+
+fn is_false(b: &bool) -> bool {
+    !*b
 }
 
 fn default_readwrite() -> Access {
