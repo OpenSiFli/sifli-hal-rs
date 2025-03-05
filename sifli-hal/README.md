@@ -58,7 +58,7 @@ Rust Hardware Abstraction Layer (HAL) and [Embassy](https://github.com/embassy-r
 
   This feature will be removed after [cortex-m-rt #580](https://github.com/rust-embedded/cortex-m/pull/580)  is released.
 
-- `time-driver-xxx`: Timer configuration for `time-driver`. It requires at least two capture/compare channels. For the `sf32lb52x hcpu`, only `atim1` (TODO: [#5](https://github.com/OpenSiFli/sifli-hal-rs/issues/5)), `gptim1`, and `gptim2` are available.
+- `time-driver-xxx`: Timer configuration for `time-driver`. It requires at least two capture/compare channels. For the `sf32lb52x hcpu`, only `atim1` (TODO: [#5](https://github.com/OpenSiFli/sifli-rs/issues/5)), `gptim1`, and `gptim2` are available.
 
 - `unchecked-overclocking`: Enable this feature to disable the overclocking check. DO NOT ENABLE THIS FEATURE UNLESS YOU KNOW WHAT YOU'RE DOING.
 

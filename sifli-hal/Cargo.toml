@@ -6,9 +6,9 @@ authors = ["OpenSiFli"]
 description = "Hardware Abstraction Layer (HAL) for SiFli MCUs"
 categories = ["hardware-support", "embedded", "no-std"]
 keywords = ["hal", "sf32", "sifli"]
-repository = "https://github.com/OpenSiFli/sifli-hal-rs"
+repository = "https://github.com/OpenSiFli/sifli-rs"
 documentation = "https://docs.rs/sifli-hal"
-homepage = "https://github.com/OpenSiFli/sifli-hal-rs"
+homepage = "https://github.com/OpenSiFli/sifli-rs"
 readme = "README.md"
 license = "MIT OR Apache-2.0"
 

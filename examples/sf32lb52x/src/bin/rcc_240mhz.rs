@@ -15,7 +15,7 @@ use sifli_hal::rcc::{self, ConfigOption, DllConfig};
 // The RCC clock configuration module is still under construction, 
 // and there is no guarantee that other clock configurations will 
 // run correctly.
-// https://github.com/OpenSiFli/sifli-hal-rs/issues/7
+// https://github.com/OpenSiFli/sifli-rs/issues/7
 
 #[embassy_executor::main]
 async fn main(_spawner: Spawner) {

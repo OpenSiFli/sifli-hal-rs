@@ -6,7 +6,7 @@
 [badge-license]: https://img.shields.io/crates/l/sifli-hal?style=for-the-badge
 [badge-support-status]: https://img.shields.io/badge/Support_status-Community-mediumpurple?style=for-the-badge
 [crates]: https://crates.io/crates/sifli-hal
-[githubrepo]: https://github.com/OpenSiFli/sifli-hal-rs
+[githubrepo]: https://github.com/OpenSiFli/sifli-rs
 
 Rust Hardware Abstraction Layer (HAL) for SiFli MCUs.
 
@@ -17,9 +17,9 @@ Rust Hardware Abstraction Layer (HAL) for SiFli MCUs.
 ## Crates
 | Github                                                       | crates.io                                       | docs.rs                                    | Support Status       |
 | ------------------------------------------------------------ | ----------------------------------------------- | ------------------------------------------ | -------------------- |
-| [sifli-hal](https://github.com/OpenSiFli/sifli-hal-rs/tree/main/sifli-hal) | [![Crates.io][hal-badge-version]][hal-cratesio] | [![docs.rs][hal-badge-docsrs]][hal-docsrs] | ![][badge-community] |
+| [sifli-hal](https://github.com/OpenSiFli/sifli-rs/tree/main/sifli-hal) | [![Crates.io][hal-badge-version]][hal-cratesio] | [![docs.rs][hal-badge-docsrs]][hal-docsrs] | ![][badge-community] |
 | [sifli-pac](https://github.com/OpenSiFli/sifli-pac)          | [![Crates.io][pac-badge-version]][pac-cratesio] | [![docs.rs][pac-badge-docsrs]][pac-docsrs] | ![][badge-community] |
-| [sifli-flash-table ](https://github.com/OpenSiFli/sifli-hal-rs/tree/main/sifli-flash-table) |                                                 |                                            | ![][badge-community] |
+| [sifli-flash-table ](https://github.com/OpenSiFli/sifli-rs/tree/main/sifli-flash-table) |                                                 |                                            | ![][badge-community] |
 
 [badge-community]: https://img.shields.io/badge/Community-mediumpurple?style=for-the-badge
 
