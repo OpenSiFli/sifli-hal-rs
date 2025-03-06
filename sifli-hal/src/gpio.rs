@@ -880,6 +880,47 @@ pub(crate) trait SealedPin: Sized {
     fn pinmux(&self) -> pac::hpsys_pinmux::HpsysPinmux {
         pac::HPSYS_PINMUX
     }
+
+    /// Set the pin as "disconnected", ie doing nothing and consuming the lowest
+    /// amount of power possible.
+    #[inline]
+    fn set_as_disconnected(&self) {
+        let pin_id = self._pin();
+        let pin_bit = 1 << (pin_id % 32);
+
+        // DISABLE_ISR
+        if pin_id % 32 == 0 {
+            self.gpio().iecr0().write_value(regs::Iecr0(pin_bit));
+        } else {
+            self.gpio().iecr1().write_value(regs::Iecr1(pin_bit));
+        }
+
+        // WAIT_ISR_DISABLED
+        crate::cortex_m_blocking_delay_us(1);
+
+        if pin_id % 32 == 0 {
+            self.gpio().isr0().write_value(sifli_pac::hpsys_gpio::regs::Isr0(pin_bit));
+
+            // CLEAR_OPEN_DRAIN_FLAG
+            self.gpio().iphcr0().write_value(sifli_pac::hpsys_gpio::regs::Iphcr0(pin_bit));
+        } else {
+            self.gpio().isr1().write_value(sifli_pac::hpsys_gpio::regs::Isr1(pin_bit));
+            self.gpio().iphcr1().write_value(sifli_pac::hpsys_gpio::regs::Iphcr1(pin_bit));
+        }
+
+        match pin_id {
+            0..=38 => {
+                self.pinmux().pad_pa0_38(pin_id as _).modify(|w| w.set_fsel(0));
+            },
+            39..=42 => {
+                self.pinmux().pad_pa39_42((pin_id - 39) as _).modify(|w| w.set_fsel(0));
+            },
+            43..=44 => {
+                self.pinmux().pad_pa43_44((pin_id - 43) as _).modify(|w| w.set_fsel(0));
+            },
+            _ => unreachable!(),
+        }
+    }
 }
 
 /// Interface for a Pin that can be configured by an [Input] or [Output] driver, or converted to an [AnyPin].

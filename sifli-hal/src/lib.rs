@@ -1,11 +1,13 @@
 #![no_std]
 #![doc = include_str!("../README.md")]
 
+// This mod MUST go first, so that the others see its macros.
+pub(crate) mod fmt;
+
 #[cfg(feature = "set-msplim")]
 use core::arch::global_asm;
 
-// This mod MUST go first, so that the others see its macros.
-pub(crate) mod fmt;
+mod macros;
 
 pub mod rcc;
 pub mod gpio;
