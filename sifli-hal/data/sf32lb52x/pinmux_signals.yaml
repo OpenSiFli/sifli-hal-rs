@@ -34,4 +34,4 @@ hcpu:
 
   - name: LCDC1_SPI_RSTB
     pin_trait:
-      crate::lcdc::SpiRstbPi1n<$peripheral>
+      crate::lcdc::SpiRstbPin<$peripheral>

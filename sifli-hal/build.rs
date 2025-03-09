@@ -74,11 +74,32 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let peripherals: Peripherals = serde_yaml::from_str(&peripherals_content)
         .map_err(|e| format!("Failed to parse peripherals.yaml: {}", e))?;
 
+    // Read and parse HPSYS_CFG.yaml
+    let cfg_path = data_dir.join("HPSYS_CFG.yaml");
+    let cfg_content = fs::read_to_string(&cfg_path)?;
+    let cfg_ir: IR = serde_yaml::from_str(&cfg_content)?;
+
+    // Read and parse pinmux_signals.yaml
+    let pinmux_signals_path = data_dir.join("pinmux_signals.yaml");
+    let pinmux_signals_content = fs::read_to_string(&pinmux_signals_path)?;
+    let pinmux_signals: build_serde::PinmuxSignals = serde_yaml::from_str(&pinmux_signals_content)?;
+
+    // Read and parse pinmux.yaml
+    let pinmux_path = data_dir.join("pinmux.yaml");
+    let pinmux_content = fs::read_to_string(&pinmux_path)?;
+    let pinmux: build_serde::Pinmux = serde_yaml::from_str(&pinmux_content)?;
+    
     // Get output path from env
     let out_dir = PathBuf::from(std::env::var("OUT_DIR").unwrap());
     let dest_path = out_dir.join("_generated.rs");
 
     let mut token_stream = TokenStream::new();
+
+    token_stream.extend(quote! {
+        use crate::peripherals::*;
+        use crate::gpio::Pin;
+        use crate::gpio::SealedPin;
+    });
 
     // Generate interrupt mod
     let interrupt_mod = generate_interrupt_mod(&interrupts);
@@ -91,6 +112,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Generate implementations
     let implementations = generate_rcc_impl(&peripherals, &fieldsets);
     token_stream.extend(implementations);
+
+    // Generate pin implementations
+    let pin_impls = generate_pin_impls(&pinmux, &pinmux_signals, &cfg_ir.fieldsets);
+    token_stream.extend(pin_impls);
 
     // Write to file
     let mut file = File::create(&dest_path).unwrap();
@@ -117,8 +142,8 @@ fn generate_rcc_impl(peripherals: &Peripherals, fieldsets: &BTreeMap<String, Fie
         if peripheral.ignore_missing_enable_reset {
             let peripheral_name_ident = format_ident!("{}", peripheral.name);
             let impl_tokens = quote! {
-                impl crate::rcc::SealedRccEnableReset for crate::peripherals::#peripheral_name_ident {}
-                impl crate::rcc::RccEnableReset for crate::peripherals::#peripheral_name_ident {}
+                impl crate::rcc::SealedRccEnableReset for #peripheral_name_ident {}
+                impl crate::rcc::RccEnableReset for #peripheral_name_ident {}
             };
             implementations.extend(impl_tokens);
             continue;
@@ -144,7 +169,7 @@ fn generate_rcc_impl(peripherals: &Peripherals, fieldsets: &BTreeMap<String, Fie
 
         let peripheral_name_ident = format_ident!("{}", peripheral.name);
         let impl_tokens = quote! {
-            impl crate::rcc::SealedRccEnableReset for crate::peripherals::#peripheral_name_ident {
+            impl crate::rcc::SealedRccEnableReset for #peripheral_name_ident {
                 #[inline(always)]
                 fn rcc_enable() {
                     crate::pac::HPSYS_RCC.#enr_reg_ident().modify(|w| w.#field_set_ident(true));
@@ -162,7 +187,7 @@ fn generate_rcc_impl(peripherals: &Peripherals, fieldsets: &BTreeMap<String, Fie
                     crate::pac::HPSYS_RCC.#rstr_reg_ident().modify(|w| w.#field_set_ident(false));
                 }
             }
-            impl crate::rcc::RccEnableReset for crate::peripherals::#peripheral_name_ident {}
+            impl crate::rcc::RccEnableReset for #peripheral_name_ident {}
         };
         implementations.extend(impl_tokens);
     }
@@ -173,12 +198,12 @@ fn generate_rcc_impl(peripherals: &Peripherals, fieldsets: &BTreeMap<String, Fie
             let clock_fn_ident = format_ident!("get_{}_freq", clock);
             let peripheral_name_ident = format_ident!("{}", peripheral.name);
             let impl_tokens = quote! {
-                impl crate::rcc::SealedRccGetFreq for crate::peripherals::#peripheral_name_ident {
+                impl crate::rcc::SealedRccGetFreq for #peripheral_name_ident {
                     fn get_freq() -> Option<Hertz> {
                         crate::rcc::#clock_fn_ident()
                     }
                 }
-                impl crate::rcc::RccGetFreq for crate::peripherals::#peripheral_name_ident {}
+                impl crate::rcc::RccGetFreq for #peripheral_name_ident {}
             };
 
             implementations.extend(impl_tokens);
@@ -247,6 +272,195 @@ fn generate_peripherals_singleton(peripherals: &Peripherals) -> TokenStream {
     }
 }
 
+fn generate_pin_impls(
+    pinmux: &build_serde::Pinmux,
+    pinmux_signals: &build_serde::PinmuxSignals,
+    fieldsets: &BTreeMap<String, FieldSet>,
+) -> TokenStream {
+    let mut implementations = TokenStream::new();
+
+    for pin in &pinmux.hcpu {
+        let pin_name = pin.pin.replace("GPIO_", "P");
+        
+        for func in &pin.functions {
+            // Try to match function against pinmux_signals
+            if let Some(signal_def) = find_matching_signal(&func.function, &pinmux_signals.hcpu) {
+                generate_signal_impl(
+                    &mut implementations,
+                    signal_def,
+                    &pin_name,
+                    func,
+                    pinmux_signals,
+                    fieldsets,
+                );
+            }
+        }
+    }
+    
+    implementations
+}
+
+fn generate_signal_impl(
+    implementations: &mut TokenStream,
+    signal_def: &build_serde::SignalDefinition,
+    pin_name: &str,
+    func: &build_serde::PinFunction,
+    pinmux_signals: &build_serde::PinmuxSignals,
+    fieldsets: &BTreeMap<String, FieldSet>,
+) {
+    let pin_ident = format_ident!("{}", pin_name);
+    
+    match &signal_def.r#type {
+        build_serde::SignalType::Gpio => {
+            generate_signal_gpio_impl(implementations, pin_name, &pin_ident);
+        },
+        build_serde::SignalType::Superimposed => {
+            // For superimposed type, process each sub-signal
+            for signal_name in &signal_def.signals {
+                // Find the corresponding signal definition
+                if let Some(sub_signal) = find_matching_signal(&signal_name, &pinmux_signals.hcpu){
+                    // Recursively process the sub-signal
+                    generate_signal_impl(
+                        implementations,
+                        sub_signal,
+                        pin_name,
+                        func,
+                        pinmux_signals,
+                        fieldsets,
+                    );
+                }
+            }
+        },
+        build_serde::SignalType::PeripheralMux => {
+            generate_signal_peripheral_mux_impl(
+                implementations,
+                signal_def,
+                &pin_ident,
+                func,
+                fieldsets,
+            );
+        },
+        build_serde::SignalType::PeripheralNomux => {
+            generate_signal_peripheral_nomux_impl(
+                implementations,
+                signal_def,
+                &pin_ident,
+                func,
+            );
+        },
+    }
+}
+
+fn generate_signal_gpio_impl(
+    implementations: &mut TokenStream,
+    pin_name: &str,
+    pin_ident: &proc_macro2::Ident,
+) { 
+    let pin_num = pin_name[2..].parse::<u8>().unwrap();
+    let bank = 0u8; // For GPIO_Ax, bank is always 0
+    implementations.extend(quote! {
+        impl_pin!(#pin_ident, #bank, #pin_num);
+    });
+}
+
+fn generate_signal_peripheral_mux_impl(
+    implementations: &mut TokenStream,
+    signal_def: &build_serde::SignalDefinition,
+    pin_ident: &proc_macro2::Ident,
+    func: &build_serde::PinFunction,
+    fieldsets: &BTreeMap<String, FieldSet>,
+) {
+    let signal = signal_def.name.clone();
+    // Handle peripheral mux implementations
+    let pattern = regex::Regex::new(&format!(
+        r"^{}(\d+)?_PINR(\d+)?$", signal
+    )).unwrap();
+
+    for (name, fieldset) in fieldsets.iter() {
+        if let Some(captures) = pattern.captures(name) {
+            let peripheral = if let Some(num) = captures.get(1) {
+                format!("{}{}", signal, num.as_str())
+            } else {
+                signal.to_string()
+            };
+
+            for field in &fieldset.fields {
+                if field.name.ends_with("_PIN") {
+                    // Trait name. First letter upper case
+                    let name = field.name.replace("_PIN", "").to_lowercase();
+                    let cfg_pin = format!("{}Pin", 
+                        name.chars().next().unwrap_or_default().to_uppercase().to_string() + 
+                        &name[1..]);
+                    let trait_path_str = signal_def.pin_trait.clone().unwrap()
+                        .replace("$peripheral", &peripheral)
+                        .replace("$cfg_pin", &cfg_pin);
+                    let trait_path = syn::parse_str::<syn::Path>(&trait_path_str)
+                        .unwrap_or_else(|_| panic!("Invalid trait path: {}", trait_path_str));
+
+                    let reg_name = format_ident!("{}_pinr", peripheral.to_lowercase());
+                    let set_field = format_ident!("set_{}", field.name.to_lowercase());
+                    let func_value = func.value;
+
+                    implementations.extend(quote! {
+                        impl #trait_path for #pin_ident {
+                            fn fsel(&self) -> u8 {
+                                #func_value
+                            }
+
+                            fn set_cfg_pin(&self) {
+                                crate::pac::HPSYS_CFG.#reg_name().modify(|w| 
+                                    w.#set_field(self.pin_bank() as _)
+                                );
+                            }
+                        }
+                    });
+                }
+            }
+        }
+        
+    }
+}
+
+fn generate_signal_peripheral_nomux_impl(
+    implementations: &mut TokenStream,
+    signal_def: &build_serde::SignalDefinition,
+    pin_ident: &proc_macro2::Ident,
+    func: &build_serde::PinFunction,
+) {
+    if let Some(pin_trait) = &signal_def.pin_trait {
+        // Extract peripheral from signal name
+        let peripheral = signal_def.name.split("_").next().unwrap();
+        let trait_path_str = pin_trait.replace("$peripheral", peripheral);
+
+        let trait_path = syn::parse_str::<syn::Path>(&trait_path_str)
+            .unwrap_or_else(|_| panic!("Invalid trait path: {}", trait_path_str));
+        let func_value = func.value;
+
+        implementations.extend(quote! {
+            impl #trait_path for #pin_ident {
+                fn fsel(&self) -> u8 {
+                    #func_value
+                }
+            }
+        });
+    } else {
+        panic!("No pin trait specified for peripheral nomux signal {}", signal_def.name);
+    }
+}
+
+fn find_matching_signal<'a>(
+    function: &str,
+    signals: &'a [build_serde::SignalDefinition],
+) -> Option<&'a build_serde::SignalDefinition> {
+    for signal in signals {
+        if regex::Regex::new(&signal.name)
+            .unwrap()
+            .is_match(function) {
+            return Some(signal);
+        }
+    }
+    None
+}
 enum GetOneError {
     None,
     Multiple,

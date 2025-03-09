@@ -270,7 +270,7 @@ impl HpsysPin {
         self.set_level(!self.get_output_level())
     }
 
-    pub fn set_function(&mut self, fsel: u8, af_type: &AfType) {
+    pub fn set_function(&mut self, fsel: u8, af_type: AfType) {
         self.set_pull(af_type.pull);
         unsafe {
             self.set_fsel_unchecked(fsel);

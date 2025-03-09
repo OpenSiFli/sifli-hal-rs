@@ -16,10 +16,10 @@ use embassy_sync::waitqueue::AtomicWaker;
 use super::{
     clear_interrupt_flags, configure, half_duplex_set_rx_tx_before_write, reconfigure, send_break, set_baudrate,
     Config, ConfigError, CtsPin, Duplex, Error, HalfDuplexConfig, HalfDuplexReadback, Instance, Regs,
-    RtsPin, RxPin, TxPin,
+    RtsPin, RxdPin, TxdPin,
 };
 
-use crate::gpio::{AnyPin, SealedPin as _};
+use crate::gpio::{AfType, AnyPin, Pull, SealedPin as _};
 use crate::interrupt::{self, InterruptExt, typelevel::Interrupt as _};
 use crate::rcc;
 use crate::time::Hertz;
@@ -212,16 +212,16 @@ impl<'d, T: Instance> BufferedUart<'d, T> {
     pub fn new(
         peri: impl Peripheral<P = T> + 'd,
         _irq: impl interrupt::typelevel::Binding<T::Interrupt, InterruptHandler<T>> + 'd,
-        rx: impl Peripheral<P = impl RxPin<T>> + 'd,
-        tx: impl Peripheral<P = impl TxPin<T>> + 'd,
+        rx: impl Peripheral<P = impl RxdPin<T>> + 'd,
+        tx: impl Peripheral<P = impl TxdPin<T>> + 'd,
         tx_buffer: &'d mut [u8],
         rx_buffer: &'d mut [u8],
         config: Config,
     ) -> Result<Self, ConfigError> {
         Self::new_inner(
             peri,
-            new_pin!(rx, AfType::input(config.rx_pull)),
-            new_pin!(tx, AfType::output(OutputType::PushPull, Speed::Medium)),
+            new_pin!(rx, AfType::new(config.rx_pull)),
+            new_pin!(tx, AfType::new(Pull::Up)),
             None,
             None,
             tx_buffer,
@@ -234,8 +234,8 @@ impl<'d, T: Instance> BufferedUart<'d, T> {
     pub fn new_with_rtscts(
         peri: impl Peripheral<P = T> + 'd,
         _irq: impl interrupt::typelevel::Binding<T::Interrupt, InterruptHandler<T>> + 'd,
-        rx: impl Peripheral<P = impl RxPin<T>> + 'd,
-        tx: impl Peripheral<P = impl TxPin<T>> + 'd,
+        rx: impl Peripheral<P = impl RxdPin<T>> + 'd,
+        tx: impl Peripheral<P = impl TxdPin<T>> + 'd,
         rts: impl Peripheral<P = impl RtsPin<T>> + 'd,
         cts: impl Peripheral<P = impl CtsPin<T>> + 'd,
         tx_buffer: &'d mut [u8],
@@ -244,10 +244,11 @@ impl<'d, T: Instance> BufferedUart<'d, T> {
     ) -> Result<Self, ConfigError> {
         Self::new_inner(
             peri,
-            new_pin!(rx, AfType::input(Pull::None)),
-            new_pin!(tx, AfType::output(OutputType::PushPull, Speed::Medium)),
-            new_pin!(rts, AfType::output(OutputType::PushPull, Speed::Medium)),
-            new_pin!(cts, AfType::input(Pull::None)),
+            // TODO: verify these pull is correct
+            new_pin!(rx, AfType::new(Pull::None)),
+            new_pin!(tx, AfType::new(Pull::Up)),
+            new_pin!(rts, AfType::new(Pull::Up)),
+            new_pin!(cts, AfType::new(Pull::None)),
             tx_buffer,
             rx_buffer,
             config,
@@ -258,8 +259,8 @@ impl<'d, T: Instance> BufferedUart<'d, T> {
     pub fn new_with_rts(
         peri: impl Peripheral<P = T> + 'd,
         _irq: impl interrupt::typelevel::Binding<T::Interrupt, InterruptHandler<T>> + 'd,
-        rx: impl Peripheral<P = impl RxPin<T>> + 'd,
-        tx: impl Peripheral<P = impl TxPin<T>> + 'd,
+        rx: impl Peripheral<P = impl RxdPin<T>> + 'd,
+        tx: impl Peripheral<P = impl TxdPin<T>> + 'd,
         rts: impl Peripheral<P = impl RtsPin<T>> + 'd,
         tx_buffer: &'d mut [u8],
         rx_buffer: &'d mut [u8],
@@ -267,9 +268,9 @@ impl<'d, T: Instance> BufferedUart<'d, T> {
     ) -> Result<Self, ConfigError> {
         Self::new_inner(
             peri,
-            new_pin!(rx, AfType::input(Pull::None)),
-            new_pin!(tx, AfType::output(OutputType::PushPull, Speed::Medium)),
-            new_pin!(rts, AfType::input(Pull::None)),
+            new_pin!(rx, AfType::new(Pull::None)),
+            new_pin!(tx, AfType::new(Pull::Up)),
+            new_pin!(rts, AfType::new(Pull::None)),
             None, // no CTS
             tx_buffer,
             rx_buffer,
@@ -291,7 +292,7 @@ impl<'d, T: Instance> BufferedUart<'d, T> {
     #[doc(alias("HDSEL"))]
     pub fn new_half_duplex(
         peri: impl Peripheral<P = T> + 'd,
-        tx: impl Peripheral<P = impl TxPin<T>> + 'd,
+        tx: impl Peripheral<P = impl TxdPin<T>> + 'd,
         _irq: impl interrupt::typelevel::Binding<T::Interrupt, InterruptHandler<T>> + 'd,
         tx_buffer: &'d mut [u8],
         rx_buffer: &'d mut [u8],
@@ -325,7 +326,7 @@ impl<'d, T: Instance> BufferedUart<'d, T> {
     #[doc(alias("HDSEL"))]
     pub fn new_half_duplex_on_rx(
         peri: impl Peripheral<P = T> + 'd,
-        rx: impl Peripheral<P = impl RxPin<T>> + 'd,
+        rx: impl Peripheral<P = impl RxdPin<T>> + 'd,
         _irq: impl interrupt::typelevel::Binding<T::Interrupt, InterruptHandler<T>> + 'd,
         tx_buffer: &'d mut [u8],
         rx_buffer: &'d mut [u8],

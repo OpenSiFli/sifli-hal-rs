@@ -602,7 +602,7 @@ impl<'d> Flex<'d> {
     }
 
     /// Set pin function select and attributes
-    pub fn set_function(&mut self, fsel: u8, af_type: &crate::gpio::AfType) {
+    pub fn set_function(&mut self, fsel: u8, af_type: crate::gpio::AfType) {
         self.inner.set_function(fsel, af_type);
     }
 
@@ -687,7 +687,7 @@ pub(crate) trait SealedPin: Sized {
     }
 
     #[inline]
-    fn set_function(&self, fsel: u8, af_type: &AfType) {
+    fn set_function(&self, fsel: u8, af_type: AfType) {
         let mut pin = HpsysPin::new(self.pin_bank());
         pin.set_function(fsel, af_type);
     }
@@ -760,37 +760,6 @@ macro_rules! impl_pin {
         }
     };
 }
-
-impl_pin!(PA0, 0, 0);
-impl_pin!(PA1, 0, 1);
-impl_pin!(PA2, 0, 2);
-impl_pin!(PA3, 0, 3);
-impl_pin!(PA4, 0, 4);
-impl_pin!(PA5, 0, 5);
-impl_pin!(PA6, 0, 6);
-impl_pin!(PA7, 0, 7);
-impl_pin!(PA8, 0, 8);
-impl_pin!(PA9, 0, 9);
-impl_pin!(PA10, 0, 10);
-impl_pin!(PA11, 0, 11);
-impl_pin!(PA12, 0, 12);
-impl_pin!(PA13, 0, 13);
-impl_pin!(PA14, 0, 14);
-impl_pin!(PA15, 0, 15);
-impl_pin!(PA16, 0, 16);
-impl_pin!(PA17, 0, 17);
-impl_pin!(PA18, 0, 18);
-impl_pin!(PA19, 0, 19);
-impl_pin!(PA20, 0, 20);
-impl_pin!(PA21, 0, 21);
-impl_pin!(PA22, 0, 22);
-impl_pin!(PA23, 0, 23);
-impl_pin!(PA24, 0, 24);
-impl_pin!(PA25, 0, 25);
-impl_pin!(PA26, 0, 26);
-impl_pin!(PA27, 0, 27);
-impl_pin!(PA28, 0, 28);
-impl_pin!(PA29, 0, 29);
 
 // ====================
 
