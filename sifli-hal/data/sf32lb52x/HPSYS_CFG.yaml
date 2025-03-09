@@ -1,0 +1,1021 @@
+block/HPSYS_CFG:
+  items:
+  - name: BMR
+    description: Boot Mode Register
+    byte_offset: 0
+    fieldset: BMR
+  - name: IDR
+    description: ID Register
+    byte_offset: 4
+    fieldset: IDR
+  - name: SWCR
+    description: SW Control Register
+    byte_offset: 8
+    fieldset: SWCR
+  - name: SCR
+    description: Security Control Register
+    byte_offset: 12
+    fieldset: SCR
+  - name: SYSCR
+    description: System Configure Register
+    byte_offset: 16
+    fieldset: SYSCR
+  - name: RTC_TR
+    description: Mirrored RTC Time Register
+    byte_offset: 20
+    fieldset: RTC_TR
+  - name: RTC_DR
+    description: Mirrored RTC Date Register
+    byte_offset: 24
+    fieldset: RTC_DR
+  - name: ULPMCR
+    description: ULP Memory Control register
+    byte_offset: 28
+    fieldset: ULPMCR
+  - name: DBGR
+    description: Debug Select Register
+    byte_offset: 32
+    fieldset: DBGR
+  - name: MDBGR
+    description: Memory Debug Register
+    byte_offset: 36
+    fieldset: MDBGR
+  - name: RSVD1
+    byte_offset: 40
+    fieldset: RSVD1
+  - name: LPIRQ
+    description: Interrupt Selection for LCPU
+    byte_offset: 60
+    fieldset: LPIRQ
+  - name: USBCR
+    description: USB Control register
+    byte_offset: 64
+    fieldset: USBCR
+  - name: SYS_RSVD
+    description: HPSYS RSVD Register
+    byte_offset: 68
+    fieldset: SYS_RSVD
+  - name: I2C1_PINR
+    description: I2C1 Pin Register
+    byte_offset: 72
+    fieldset: I2C1_PINR
+  - name: I2C2_PINR
+    description: I2C2 Pin Register
+    byte_offset: 76
+    fieldset: I2C2_PINR
+  - name: I2C3_PINR
+    description: I2C3 Pin Register
+    byte_offset: 80
+    fieldset: I2C3_PINR
+  - name: I2C4_PINR
+    description: I2C4 Pin Register
+    byte_offset: 84
+    fieldset: I2C4_PINR
+  - name: USART1_PINR
+    description: USART1 Pin Register
+    byte_offset: 88
+    fieldset: USART1_PINR
+  - name: USART2_PINR
+    description: USART2 Pin Register
+    byte_offset: 92
+    fieldset: USART2_PINR
+  - name: USART3_PINR
+    description: USART3 Pin Register
+    byte_offset: 96
+    fieldset: USART3_PINR
+  - name: GPTIM1_PINR
+    description: GPTIM1 Pin Register
+    byte_offset: 100
+    fieldset: GPTIM1_PINR
+  - name: GPTIM2_PINR
+    description: GPTIM2 Pin Register
+    byte_offset: 104
+    fieldset: GPTIM2_PINR
+  - name: ETR_PINR
+    description: GPTIM ETR Pin Register
+    byte_offset: 108
+    fieldset: ETR_PINR
+  - name: LPTIM1_PINR
+    description: LPTIM1 Pin Register
+    byte_offset: 112
+    fieldset: LPTIM1_PINR
+  - name: LPTIM2_PINR
+    description: LPTIM2 Pin Register
+    byte_offset: 116
+    fieldset: LPTIM2_PINR
+  - name: ATIM1_PINR1
+    description: ATIM1 Pin Register 1
+    byte_offset: 120
+    fieldset: ATIM1_PINR1
+  - name: ATIM1_PINR2
+    description: ATIM1 Pin Register 2
+    byte_offset: 124
+    fieldset: ATIM1_PINR2
+  - name: ATIM1_PINR3
+    description: ATIM1 Pin Register 3
+    byte_offset: 128
+    fieldset: ATIM1_PINR3
+  - name: PTA_PINR
+    description: PTA Pin Register
+    byte_offset: 132
+    fieldset: PTA_PINR
+  - name: ANAU_CR
+    description: ANAU Control Register
+    byte_offset: 136
+    fieldset: ANAU_CR
+  - name: ANAU_RSVD
+    description: ANAU Reserve Register
+    byte_offset: 140
+    fieldset: ANAU_RSVD
+  - name: ANATR
+    description: Analog Test Register
+    byte_offset: 144
+    fieldset: ANATR
+  - name: CAU2_CR
+    description: CAU2 Control Register
+    byte_offset: 148
+    fieldset: CAU2_CR
+  - name: CAU2_RSVD
+    description: CAU2 RSVD Register1
+    byte_offset: 152
+    fieldset: CAU2_RSVD
+fieldset/ANATR:
+  description: Analog Test Register
+  fields:
+  - name: DC_TE_ATEST0
+    description: reserved for debug
+    bit_offset: 0
+    bit_size: 1
+  - name: DC_UR_ATEST0
+    description: reserved for debug
+    bit_offset: 1
+    bit_size: 3
+  - name: DC_TE_ATEST1
+    description: reserved for debug
+    bit_offset: 4
+    bit_size: 1
+  - name: DC_UR_ATEST1
+    description: reserved for debug
+    bit_offset: 5
+    bit_size: 3
+  - name: RSVD
+    bit_offset: 8
+    bit_size: 24
+fieldset/ANAU_CR:
+  description: ANAU Control Register
+  fields:
+  - name: EN_BG
+    description: reserved for debug
+    bit_offset: 0
+    bit_size: 1
+  - name: EN_VBAT_MON
+    description: reserved for debug
+    bit_offset: 1
+    bit_size: 1
+  - name: EFUSE_VDD_EN
+    description: reserved for debug
+    bit_offset: 2
+    bit_size: 1
+  - name: EFUSE_VDD_PD
+    description: reserved for debug
+    bit_offset: 3
+    bit_size: 1
+  - name: DC_MR
+    description: reserved for debug
+    bit_offset: 4
+    bit_size: 3
+  - name: RSVD
+    bit_offset: 7
+    bit_size: 25
+fieldset/ANAU_RSVD:
+  description: ANAU Reserve Register
+  fields:
+  - name: RESERVE0
+    description: reserved for debug
+    bit_offset: 0
+    bit_size: 8
+  - name: RESERVE1
+    description: reserved for debug
+    bit_offset: 8
+    bit_size: 8
+  - name: RESERVE2
+    description: reserved for debug
+    bit_offset: 16
+    bit_size: 8
+  - name: RESERVE3
+    description: reserved for debug
+    bit_offset: 24
+    bit_size: 8
+fieldset/ATIM1_PINR1:
+  description: ATIM1 Pin Register 1
+  fields:
+  - name: CH1_PIN
+    description: Connect function pin to selected IO(PA). 0 to 44 for PA00 to PA44. Other values for floating.
+    bit_offset: 0
+    bit_size: 6
+  - name: RSVD4
+    bit_offset: 6
+    bit_size: 2
+  - name: CH2_PIN
+    description: Connect function pin to selected IO(PA). 0 to 44 for PA00 to PA44. Other values for floating.
+    bit_offset: 8
+    bit_size: 6
+  - name: RSVD3
+    bit_offset: 14
+    bit_size: 2
+  - name: CH3_PIN
+    description: Connect function pin to selected IO(PA). 0 to 44 for PA00 to PA44. Other values for floating.
+    bit_offset: 16
+    bit_size: 6
+  - name: RSVD2
+    bit_offset: 22
+    bit_size: 2
+  - name: CH4_PIN
+    description: Connect function pin to selected IO(PA). 0 to 44 for PA00 to PA44. Other values for floating.
+    bit_offset: 24
+    bit_size: 6
+  - name: RSVD
+    bit_offset: 30
+    bit_size: 2
+fieldset/ATIM1_PINR2:
+  description: ATIM1 Pin Register 2
+  fields:
+  - name: CH1N_PIN
+    description: Connect function pin to selected IO(PA). 0 to 44 for PA00 to PA44. Other values for floating.
+    bit_offset: 0
+    bit_size: 6
+  - name: RSVD3
+    bit_offset: 6
+    bit_size: 2
+  - name: CH2N_PIN
+    description: Connect function pin to selected IO(PA). 0 to 44 for PA00 to PA44. Other values for floating.
+    bit_offset: 8
+    bit_size: 6
+  - name: RSVD2
+    bit_offset: 14
+    bit_size: 2
+  - name: CH3N_PIN
+    description: Connect function pin to selected IO(PA). 0 to 44 for PA00 to PA44. Other values for floating.
+    bit_offset: 16
+    bit_size: 6
+  - name: RSVD
+    bit_offset: 22
+    bit_size: 10
+fieldset/ATIM1_PINR3:
+  description: ATIM1 Pin Register 3
+  fields:
+  - name: BK_PIN
+    description: Connect function pin to selected IO(PA). 0 to 44 for PA00 to PA44. Other values for floating.
+    bit_offset: 0
+    bit_size: 6
+  - name: RSVD3
+    bit_offset: 6
+    bit_size: 2
+  - name: BK2_PIN
+    description: Connect function pin to selected IO(PA). 0 to 44 for PA00 to PA44. Other values for floating.
+    bit_offset: 8
+    bit_size: 6
+  - name: RSVD2
+    bit_offset: 14
+    bit_size: 2
+  - name: ETR_PIN
+    description: Connect function pin to selected IO(PA). 0 to 44 for PA00 to PA44. Other values for floating.
+    bit_offset: 16
+    bit_size: 6
+  - name: RSVD
+    bit_offset: 22
+    bit_size: 10
+fieldset/BMR:
+  description: Boot Mode Register
+  fields:
+  - name: BOOT_MODE
+    description: 0 - normal mode, 1 - download mode
+    bit_offset: 0
+    bit_size: 1
+  - name: RSVD
+    bit_offset: 1
+    bit_size: 31
+fieldset/CAU2_CR:
+  description: CAU2 Control Register
+  fields:
+  - name: HPBG_VDDPSW_EN
+    description: reserved for debug
+    bit_offset: 0
+    bit_size: 1
+  - name: HPBG_EN
+    description: reserved for debug
+    bit_offset: 1
+    bit_size: 1
+  - name: RSVD2
+    bit_offset: 2
+    bit_size: 2
+  - name: DC_TR
+    description: reserved for debug
+    bit_offset: 4
+    bit_size: 3
+  - name: DC_BR
+    description: reserved for debug
+    bit_offset: 7
+    bit_size: 3
+  - name: DC_MR
+    description: reserved for debug
+    bit_offset: 10
+    bit_size: 3
+  - name: RSVD
+    bit_offset: 13
+    bit_size: 19
+fieldset/CAU2_RSVD:
+  description: CAU2 RSVD Register1
+  fields:
+  - name: RESERVE0
+    description: reserved for debug
+    bit_offset: 0
+    bit_size: 8
+  - name: RESERVE1
+    description: reserved for debug
+    bit_offset: 8
+    bit_size: 8
+  - name: RESERVE2
+    description: reserved for debug
+    bit_offset: 16
+    bit_size: 8
+  - name: RSVD
+    bit_offset: 24
+    bit_size: 8
+fieldset/DBGR:
+  description: Debug Select Register
+  fields:
+  - name: SEL_L
+    description: reserved for debug
+    bit_offset: 0
+    bit_size: 4
+  - name: SEL_H
+    description: reserved for debug
+    bit_offset: 4
+    bit_size: 4
+  - name: BITEN_L
+    description: reserved for debug
+    bit_offset: 8
+    bit_size: 8
+  - name: BITEN_H
+    description: reserved for debug
+    bit_offset: 16
+    bit_size: 8
+  - name: CLK_SEL
+    description: reserved for debug
+    bit_offset: 24
+    bit_size: 3
+  - name: CLK_EN
+    description: reserved for debug
+    bit_offset: 27
+    bit_size: 1
+  - name: HP2LP_NMI
+    description: set 1 to send NMI interrupt to LCPU
+    bit_offset: 28
+    bit_size: 1
+  - name: LP2HP_NMIE
+    description: LP2HP NMI interrupt enable
+    bit_offset: 29
+    bit_size: 1
+  - name: LP2HP_NMIF
+    description: LP2HP NMI interrupt flag
+    bit_offset: 30
+    bit_size: 1
+  - name: SWAP
+    description: reserved for debug
+    bit_offset: 31
+    bit_size: 1
+fieldset/ETR_PINR:
+  description: GPTIM ETR Pin Register
+  fields:
+  - name: ETR1_PIN
+    description: Connect GPTIM1_ETR to selected IO(PA). 0 to 44 for PA00 to PA44. Other values for floating.
+    bit_offset: 0
+    bit_size: 6
+  - name: RSVD2
+    bit_offset: 6
+    bit_size: 2
+  - name: ETR2_PIN
+    description: Connect GPTIM2_ETR to selected IO(PA). 0 to 44 for PA00 to PA44. Other values for floating.
+    bit_offset: 8
+    bit_size: 6
+  - name: RSVD
+    bit_offset: 14
+    bit_size: 18
+fieldset/GPTIM1_PINR:
+  description: GPTIM1 Pin Register
+  fields:
+  - name: CH1_PIN
+    description: Connect function pin to selected IO(PA). 0 to 44 for PA00 to PA44. Other values for floating.
+    bit_offset: 0
+    bit_size: 6
+  - name: RSVD4
+    bit_offset: 6
+    bit_size: 2
+  - name: CH2_PIN
+    description: Connect function pin to selected IO(PA). 0 to 44 for PA00 to PA44. Other values for floating.
+    bit_offset: 8
+    bit_size: 6
+  - name: RSVD3
+    bit_offset: 14
+    bit_size: 2
+  - name: CH3_PIN
+    description: Connect function pin to selected IO(PA). 0 to 44 for PA00 to PA44. Other values for floating.
+    bit_offset: 16
+    bit_size: 6
+  - name: RSVD2
+    bit_offset: 22
+    bit_size: 2
+  - name: CH4_PIN
+    description: Connect function pin to selected IO(PA). 0 to 44 for PA00 to PA44. Other values for floating.
+    bit_offset: 24
+    bit_size: 6
+  - name: RSVD
+    bit_offset: 30
+    bit_size: 2
+fieldset/GPTIM2_PINR:
+  description: GPTIM2 Pin Register
+  fields:
+  - name: CH1_PIN
+    description: Connect function pin to selected IO(PA). 0 to 44 for PA00 to PA44. Other values for floating.
+    bit_offset: 0
+    bit_size: 6
+  - name: RSVD4
+    bit_offset: 6
+    bit_size: 2
+  - name: CH2_PIN
+    description: Connect function pin to selected IO(PA). 0 to 44 for PA00 to PA44. Other values for floating.
+    bit_offset: 8
+    bit_size: 6
+  - name: RSVD3
+    bit_offset: 14
+    bit_size: 2
+  - name: CH3_PIN
+    description: Connect function pin to selected IO(PA). 0 to 44 for PA00 to PA44. Other values for floating.
+    bit_offset: 16
+    bit_size: 6
+  - name: RSVD2
+    bit_offset: 22
+    bit_size: 2
+  - name: CH4_PIN
+    description: Connect function pin to selected IO(PA). 0 to 44 for PA00 to PA44. Other values for floating.
+    bit_offset: 24
+    bit_size: 6
+  - name: RSVD
+    bit_offset: 30
+    bit_size: 2
+fieldset/I2C1_PINR:
+  description: I2C1 Pin Register
+  fields:
+  - name: SCL_PIN
+    description: Connect function pin to selected IO(PA). 0 to 44 for PA00 to PA44. Other values for floating.
+    bit_offset: 0
+    bit_size: 6
+  - name: RSVD2
+    bit_offset: 6
+    bit_size: 2
+  - name: SDA_PIN
+    description: Connect function pin to selected IO(PA). 0 to 44 for PA00 to PA44. Other values for floating.
+    bit_offset: 8
+    bit_size: 6
+  - name: RSVD
+    bit_offset: 14
+    bit_size: 18
+fieldset/I2C2_PINR:
+  description: I2C2 Pin Register
+  fields:
+  - name: SCL_PIN
+    description: Connect function pin to selected IO(PA). 0 to 44 for PA00 to PA44. Other values for floating.
+    bit_offset: 0
+    bit_size: 6
+  - name: RSVD2
+    bit_offset: 6
+    bit_size: 2
+  - name: SDA_PIN
+    description: Connect function pin to selected IO(PA). 0 to 44 for PA00 to PA44. Other values for floating.
+    bit_offset: 8
+    bit_size: 6
+  - name: RSVD
+    bit_offset: 14
+    bit_size: 18
+fieldset/I2C3_PINR:
+  description: I2C3 Pin Register
+  fields:
+  - name: SCL_PIN
+    description: Connect function pin to selected IO(PA). 0 to 44 for PA00 to PA44. Other values for floating.
+    bit_offset: 0
+    bit_size: 6
+  - name: RSVD2
+    bit_offset: 6
+    bit_size: 2
+  - name: SDA_PIN
+    description: Connect function pin to selected IO(PA). 0 to 44 for PA00 to PA44. Other values for floating.
+    bit_offset: 8
+    bit_size: 6
+  - name: RSVD
+    bit_offset: 14
+    bit_size: 18
+fieldset/I2C4_PINR:
+  description: I2C4 Pin Register
+  fields:
+  - name: SCL_PIN
+    description: Connect function pin to selected IO(PA). 0 to 44 for PA00 to PA44. Other values for floating.
+    bit_offset: 0
+    bit_size: 6
+  - name: RSVD2
+    bit_offset: 6
+    bit_size: 2
+  - name: SDA_PIN
+    description: Connect function pin to selected IO(PA). 0 to 44 for PA00 to PA44. Other values for floating.
+    bit_offset: 8
+    bit_size: 6
+  - name: RSVD
+    bit_offset: 14
+    bit_size: 18
+fieldset/IDR:
+  description: ID Register
+  fields:
+  - name: REVID
+    description: Revision ID
+    bit_offset: 0
+    bit_size: 8
+  - name: PID
+    description: Package ID
+    bit_offset: 8
+    bit_size: 8
+  - name: CID
+    description: Chip ID
+    bit_offset: 16
+    bit_size: 8
+  - name: SID
+    description: Series ID
+    bit_offset: 24
+    bit_size: 8
+fieldset/LPIRQ:
+  description: Interrupt Selection for LCPU
+  fields:
+  - name: SEL0
+    description: select hp2lp0 interrupt source
+    bit_offset: 0
+    bit_size: 6
+  - name: RSVD3
+    bit_offset: 6
+    bit_size: 1
+  - name: IF0
+    description: hp2lp0 interrupt status. Write 1 to clear.
+    bit_offset: 7
+    bit_size: 1
+  - name: SEL1
+    description: select hp2lp1 interrupt source
+    bit_offset: 8
+    bit_size: 6
+  - name: RSVD2
+    bit_offset: 14
+    bit_size: 1
+  - name: IF1
+    description: hp2lp1 interrupt status. Write 1 to clear.
+    bit_offset: 15
+    bit_size: 1
+  - name: RSVD
+    bit_offset: 16
+    bit_size: 16
+fieldset/LPTIM1_PINR:
+  description: LPTIM1 Pin Register
+  fields:
+  - name: IN_PIN
+    description: Connect function pin to selected IO(PA). 0 to 44 for PA00 to PA44. Other values for floating.
+    bit_offset: 0
+    bit_size: 6
+  - name: RSVD3
+    bit_offset: 6
+    bit_size: 2
+  - name: OUT_PIN
+    description: Connect function pin to selected IO(PA). 0 to 44 for PA00 to PA44. Other values for floating.
+    bit_offset: 8
+    bit_size: 6
+  - name: RSVD2
+    bit_offset: 14
+    bit_size: 2
+  - name: ETR_PIN
+    description: Connect function pin to selected IO(PA). 0 to 44 for PA00 to PA44. Other values for floating.
+    bit_offset: 16
+    bit_size: 6
+  - name: RSVD
+    bit_offset: 22
+    bit_size: 10
+fieldset/LPTIM2_PINR:
+  description: LPTIM2 Pin Register
+  fields:
+  - name: IN_PIN
+    description: Connect function pin to selected IO(PA). 0 to 44 for PA00 to PA44. Other values for floating.
+    bit_offset: 0
+    bit_size: 6
+  - name: RSVD3
+    bit_offset: 6
+    bit_size: 2
+  - name: OUT_PIN
+    description: Connect function pin to selected IO(PA). 0 to 44 for PA00 to PA44. Other values for floating.
+    bit_offset: 8
+    bit_size: 6
+  - name: RSVD2
+    bit_offset: 14
+    bit_size: 2
+  - name: ETR_PIN
+    description: Connect function pin to selected IO(PA). 0 to 44 for PA00 to PA44. Other values for floating.
+    bit_offset: 16
+    bit_size: 6
+  - name: RSVD
+    bit_offset: 22
+    bit_size: 10
+fieldset/MDBGR:
+  description: Memory Debug Register
+  fields:
+  - name: LS_RAM0
+    description: reserved for debug
+    bit_offset: 0
+    bit_size: 1
+  - name: LS_RAM1
+    description: reserved for debug
+    bit_offset: 1
+    bit_size: 1
+  - name: LS_RAM2
+    description: reserved for debug
+    bit_offset: 2
+    bit_size: 1
+  - name: LS_ROM
+    description: reserved for debug
+    bit_offset: 3
+    bit_size: 1
+  - name: PD_ROM
+    description: reserved for debug
+    bit_offset: 4
+    bit_size: 1
+  - name: RSVD
+    bit_offset: 5
+    bit_size: 27
+fieldset/PTA_PINR:
+  description: PTA Pin Register
+  fields:
+  - name: BT_ACTIVE
+    description: Connect function pin to selected IO(PA). 0 to 44 for PA00 to PA44. Other values for floating.
+    bit_offset: 0
+    bit_size: 6
+  - name: RSVD4
+    bit_offset: 6
+    bit_size: 2
+  - name: BT_COLLISION
+    description: Connect function pin to selected IO(PA). 0 to 44 for PA00 to PA44. Other values for floating.
+    bit_offset: 8
+    bit_size: 6
+  - name: RSVD3
+    bit_offset: 14
+    bit_size: 2
+  - name: BT_PRIORITY
+    description: Connect function pin to selected IO(PA). 0 to 44 for PA00 to PA44. Other values for floating.
+    bit_offset: 16
+    bit_size: 6
+  - name: RSVD2
+    bit_offset: 22
+    bit_size: 2
+  - name: WLAN_ACTIVE
+    description: Connect function pin to selected IO(PA). 0 to 44 for PA00 to PA44. Other values for floating.
+    bit_offset: 24
+    bit_size: 6
+  - name: RSVD
+    bit_offset: 30
+    bit_size: 2
+fieldset/RSVD1:
+  fields: []
+fieldset/RTC_DR:
+  description: Mirrored RTC Date Register
+  fields:
+  - name: DU
+    description: Date units in BCD format
+    bit_offset: 0
+    bit_size: 4
+  - name: DT
+    description: Date tens in BCD format
+    bit_offset: 4
+    bit_size: 2
+  - name: RSVD2
+    bit_offset: 6
+    bit_size: 2
+  - name: MU
+    description: Month units in BCD format
+    bit_offset: 8
+    bit_size: 4
+  - name: MT
+    description: Month tens in BCD format
+    bit_offset: 12
+    bit_size: 1
+  - name: WD
+    description: 'Week day units 000: forbidden 001: Monday ... 111: Sunday'
+    bit_offset: 13
+    bit_size: 3
+  - name: YU
+    description: Year units in BCD format
+    bit_offset: 16
+    bit_size: 4
+  - name: YT
+    description: Year tens in BCD format
+    bit_offset: 20
+    bit_size: 4
+  - name: CB
+    description: Century flag
+    bit_offset: 24
+    bit_size: 1
+  - name: RSVD
+    bit_offset: 25
+    bit_size: 6
+  - name: ERR
+    description: reserved for debug
+    bit_offset: 31
+    bit_size: 1
+fieldset/RTC_TR:
+  description: Mirrored RTC Time Register
+  fields:
+  - name: SS
+    description: Sub-second counter
+    bit_offset: 0
+    bit_size: 10
+  - name: RSVD
+    bit_offset: 10
+    bit_size: 1
+  - name: SU
+    description: Second units in BCD format
+    bit_offset: 11
+    bit_size: 4
+  - name: ST
+    description: Second tens in BCD format
+    bit_offset: 15
+    bit_size: 3
+  - name: MNU
+    description: Minute units in BCD format
+    bit_offset: 18
+    bit_size: 4
+  - name: MNT
+    description: Minute tens in BCD format
+    bit_offset: 22
+    bit_size: 3
+  - name: HU
+    description: Hour units in BCD format
+    bit_offset: 25
+    bit_size: 4
+  - name: HT
+    description: Hour tens in BCD format
+    bit_offset: 29
+    bit_size: 2
+  - name: PM
+    description: 'AM/PM notation 0: AM 1: PM'
+    bit_offset: 31
+    bit_size: 1
+fieldset/SCR:
+  description: Security Control Register
+  fields:
+  - name: FKEY_MODE
+    description: reserved for debug
+    bit_offset: 0
+    bit_size: 1
+  - name: RSVD
+    bit_offset: 1
+    bit_size: 31
+fieldset/SWCR:
+  description: SW Control Register
+  fields:
+  - name: SWSEL
+    description: reserved for debug
+    bit_offset: 0
+    bit_size: 1
+  - name: RSVD
+    bit_offset: 1
+    bit_size: 31
+fieldset/SYSCR:
+  description: System Configure Register
+  fields:
+  - name: WDT1_REBOOT
+    description: If set to 1, WDT1 reset will reboot the whole chip
+    bit_offset: 0
+    bit_size: 1
+  - name: SDNAND
+    description: '0: MPI2 AHB space is allocated to MPI2 1: MPI2 AHB space is allocated to SDMMC1'
+    bit_offset: 1
+    bit_size: 1
+  - name: LDO_VSEL
+    description: 'select work mode 0: enhanced mode 1: base mode'
+    bit_offset: 2
+    bit_size: 1
+  - name: RSVD
+    bit_offset: 3
+    bit_size: 29
+fieldset/SYS_RSVD:
+  description: HPSYS RSVD Register
+  fields:
+  - name: RESERVE0
+    description: reserved for debug
+    bit_offset: 0
+    bit_size: 8
+  - name: RESERVE1
+    description: reserved for debug
+    bit_offset: 8
+    bit_size: 8
+  - name: RESERVE2
+    description: reserved for debug
+    bit_offset: 16
+    bit_size: 8
+  - name: RESERVE3
+    description: reserved for debug
+    bit_offset: 24
+    bit_size: 8
+fieldset/ULPMCR:
+  description: ULP Memory Control register
+  fields:
+  - name: RAM_RM
+    description: reserved for debug
+    bit_offset: 0
+    bit_size: 2
+  - name: RSVD4
+    bit_offset: 2
+    bit_size: 2
+  - name: RAM_RME
+    description: reserved for debug
+    bit_offset: 4
+    bit_size: 1
+  - name: RAM_RA
+    description: reserved for debug
+    bit_offset: 5
+    bit_size: 2
+  - name: RAM_WA
+    description: reserved for debug
+    bit_offset: 7
+    bit_size: 3
+  - name: RAM_WPULSE
+    description: reserved for debug
+    bit_offset: 10
+    bit_size: 3
+  - name: RSVD3
+    bit_offset: 13
+    bit_size: 3
+  - name: ROM_RM
+    description: reserved for debug
+    bit_offset: 16
+    bit_size: 2
+  - name: RSVD2
+    bit_offset: 18
+    bit_size: 2
+  - name: ROM_RME
+    description: reserved for debug
+    bit_offset: 20
+    bit_size: 1
+  - name: RSVD
+    bit_offset: 21
+    bit_size: 9
+  - name: ROM_DIS
+    description: reserved for debug
+    bit_offset: 30
+    bit_size: 1
+  - name: FORCE_ON
+    description: reserved for debug
+    bit_offset: 31
+    bit_size: 1
+fieldset/USART1_PINR:
+  description: USART1 Pin Register
+  fields:
+  - name: TXD_PIN
+    description: Connect function pin to selected IO(PA). 0 to 44 for PA00 to PA44. Other values for floating.
+    bit_offset: 0
+    bit_size: 6
+  - name: RSVD4
+    bit_offset: 6
+    bit_size: 2
+  - name: RXD_PIN
+    description: Connect function pin to selected IO(PA). 0 to 44 for PA00 to PA44. Other values for floating.
+    bit_offset: 8
+    bit_size: 6
+  - name: RSVD3
+    bit_offset: 14
+    bit_size: 2
+  - name: RTS_PIN
+    description: Connect function pin to selected IO(PA). 0 to 44 for PA00 to PA44. Other values for floating.
+    bit_offset: 16
+    bit_size: 6
+  - name: RSVD2
+    bit_offset: 22
+    bit_size: 2
+  - name: CTS_PIN
+    description: Connect function pin to selected IO(PA). 0 to 44 for PA00 to PA44. Other values for floating.
+    bit_offset: 24
+    bit_size: 6
+  - name: RSVD
+    bit_offset: 30
+    bit_size: 2
+fieldset/USART2_PINR:
+  description: USART2 Pin Register
+  fields:
+  - name: TXD_PIN
+    description: Connect function pin to selected IO(PA). 0 to 44 for PA00 to PA44. Other values for floating.
+    bit_offset: 0
+    bit_size: 6
+  - name: RSVD4
+    bit_offset: 6
+    bit_size: 2
+  - name: RXD_PIN
+    description: Connect function pin to selected IO(PA). 0 to 44 for PA00 to PA44. Other values for floating.
+    bit_offset: 8
+    bit_size: 6
+  - name: RSVD3
+    bit_offset: 14
+    bit_size: 2
+  - name: RTS_PIN
+    description: Connect function pin to selected IO(PA). 0 to 44 for PA00 to PA44. Other values for floating.
+    bit_offset: 16
+    bit_size: 6
+  - name: RSVD2
+    bit_offset: 22
+    bit_size: 2
+  - name: CTS_PIN
+    description: Connect function pin to selected IO(PA). 0 to 44 for PA00 to PA44. Other values for floating.
+    bit_offset: 24
+    bit_size: 6
+  - name: RSVD
+    bit_offset: 30
+    bit_size: 2
+fieldset/USART3_PINR:
+  description: USART3 Pin Register
+  fields:
+  - name: TXD_PIN
+    description: Connect function pin to selected IO(PA). 0 to 44 for PA00 to PA44. Other values for floating.
+    bit_offset: 0
+    bit_size: 6
+  - name: RSVD4
+    bit_offset: 6
+    bit_size: 2
+  - name: RXD_PIN
+    description: Connect function pin to selected IO(PA). 0 to 44 for PA00 to PA44. Other values for floating.
+    bit_offset: 8
+    bit_size: 6
+  - name: RSVD3
+    bit_offset: 14
+    bit_size: 2
+  - name: RTS_PIN
+    description: Connect function pin to selected IO(PA). 0 to 44 for PA00 to PA44. Other values for floating.
+    bit_offset: 16
+    bit_size: 6
+  - name: RSVD2
+    bit_offset: 22
+    bit_size: 2
+  - name: CTS_PIN
+    description: Connect function pin to selected IO(PA). 0 to 44 for PA00 to PA44. Other values for floating.
+    bit_offset: 24
+    bit_size: 6
+  - name: RSVD
+    bit_offset: 30
+    bit_size: 2
+fieldset/USBCR:
+  description: USB Control register
+  fields:
+  - name: USB_EN
+    description: USB PHY enable, turn on power swith, power up LDO and bias
+    bit_offset: 0
+    bit_size: 1
+  - name: LDO_VSEL
+    description: 2.5V LDO output voltage setting 0 = 2.40 V, 1 = 2.47 V, 2 = 2.53 V, 3 = 2.60 V, 4 = 2.60 V, 5 = 2.67 V, 6 = 2.73 V, 7 = 2.8 V
+    bit_offset: 1
+    bit_size: 3
+  - name: LDO_LP_EN
+    description: 2.5V LDO low power mode enable. 0 = 240 uA, 1 = 50 uA
+    bit_offset: 4
+    bit_size: 1
+  - name: DM_PD
+    description: enable DM 15k Ohm pull down resistor
+    bit_offset: 5
+    bit_size: 1
+  - name: DP_EN
+    description: 0:disable dp pull up or pull down 1:enable dp pull or pull down
+    bit_offset: 6
+    bit_size: 1
+  - name: RSVD2
+    bit_offset: 7
+    bit_size: 1
+  - name: TX_RTUNE
+    description: TX outp impedance tuning 0 = 50 Ohm, 1 = 46 Ohm, 2 = 43 Ohm, 3 = 40 Ohm, 4 = 37.5 Ohm, 5 = 35 Ohm, 6 = 33 Ohm, 7 = 31.5 Ohm
+    bit_offset: 8
+    bit_size: 3
+  - name: RSVD
+    bit_offset: 11
+    bit_size: 1
+  - name: DC_TE
+    description: reserved for debug
+    bit_offset: 12
+    bit_size: 1
+  - name: DC_TR
+    description: reserved for debug
+    bit_offset: 13
+    bit_size: 3
+  - name: RSVD0
+    description: reserved for debug
+    bit_offset: 16
+    bit_size: 8
+  - name: RSVD1
+    description: reserved for debug
+    bit_offset: 24
+    bit_size: 8

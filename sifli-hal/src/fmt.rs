@@ -1,3 +1,7 @@
+// The following code is modified from embassy-rp under MIT license
+// https://github.com/embassy-rs/embassy/tree/main/embassy-rp
+// Special thanks to the Embassy Project and its contributors for their work!
+
 #![macro_use]
 #![allow(unused)]
 

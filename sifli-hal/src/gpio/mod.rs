@@ -7,15 +7,16 @@ use core::task::{Context, Poll};
 
 use embassy_hal_internal::{impl_peripheral, into_ref, PeripheralRef};
 use embassy_sync::waitqueue::AtomicWaker;
+use hpsys::HpsysPin;
 
 use crate::interrupt::InterruptExt;
-use crate::pac::hpsys_gpio::regs;
-use crate::pac::hpsys_pinmux::vals;
 use crate::{interrupt, pac, peripherals, Peripheral};
 
 // TODO: move this const to _generated.rs
 #[cfg(any(feature = "sf32lb52x"))]
 pub(crate) const PA_PIN_COUNT: usize = 30;
+
+pub(crate) mod hpsys;
 
 static PA_WAKERS: [AtomicWaker; PA_PIN_COUNT] = [const { AtomicWaker::new() }; PA_PIN_COUNT];
 
@@ -493,312 +494,116 @@ impl<'d> OutputOpenDrain<'d> {
 /// mode.
 pub struct Flex<'d> {
     pub(crate) pin: PeripheralRef<'d, AnyPin>,
+    inner: HpsysPin,
 }
 
 impl<'d> Flex<'d> {
-    /// Wrap the pin in a `Flex`.
-    ///
-    /// The pin remains disconnected. The initial output level is unspecified, but can be changed
-    /// before the pin is put into output mode.
-    #[inline]
+    /// Create a new Flex pin
     pub fn new(pin: impl Peripheral<P = impl Pin> + 'd) -> Self {
         into_ref!(pin);
-
-        let mut pin = Self { pin: pin.map_into() };
-        
-        // DISABLE_ISR
-        if pin.pin.pin() % 32 == 0 {
-            pin.pin.gpio().iecr0().write_value(regs::Iecr0(pin.bit()));
-        } else {
-            pin.pin.gpio().iecr1().write_value(regs::Iecr1(pin.bit()));
-        }
-
-        // WAIT_ISR_DISABLED
-        crate::cortex_m_blocking_delay_us(1);
-
-        if pin.pin.pin() % 32 == 0 {
-            pin.pin.gpio().isr0().write_value(sifli_pac::hpsys_gpio::regs::Isr0(pin.bit()));
-
-            // CLEAR_OPEN_DRAIN_FLAG
-            pin.pin.gpio().iphcr0().write_value(sifli_pac::hpsys_gpio::regs::Iphcr0(pin.bit()));
-        } else {
-            pin.pin.gpio().isr1().write_value(sifli_pac::hpsys_gpio::regs::Isr1(pin.bit()));
-            pin.pin.gpio().iphcr1().write_value(sifli_pac::hpsys_gpio::regs::Iphcr1(pin.bit()));
-        }
-        
-        unsafe {
-            pin.set_fsel_unchecked(0);
-        }
-        pin     
-    }
-
-    #[inline]
-    fn bit(&self) -> u32 {
-        1 << (self.pin.pin() % 32)
-    }
-
-    /// Set the pin's pull.
-    #[inline]
-    pub fn set_pull(&mut self, pull: Pull) {
-        let (pe, ps) = match pull {
-            Pull::None => (false, vals::Ps::Down),
-            Pull::Up => (true, vals::Ps::Up),
-            Pull::Down => (true, vals::Ps::Down),
+        let mut flex = Self {
+            inner: HpsysPin::new(pin.pin_bank()),
+            pin: pin.map_into(),
         };
-
-        let pin_id = self.pin.pin();
-        match pin_id {
-            0..=38 => {
-                self.pin.pinmux().pad_pa0_38(pin_id as _).modify(|w| {
-                    w.set_pe(pe);
-                    w.set_ps(ps);
-                });
-            },
-            39..=42 => {
-                self.pin.pinmux().pad_pa39_42((pin_id - 39) as _).modify(|w| {
-                    w.set_pe(pe);
-                    w.set_ps(ps);
-                });
-            },
-            43..=44 => {
-                self.pin.pinmux().pad_pa43_44((pin_id - 43) as _).modify(|w| {
-                    w.set_pe(pe);
-                    w.set_ps(ps);
-                });
-            },
-            _ => unreachable!(),
-        }
+        flex.inner.disable_interrupt();
+        flex.inner.clear_flags();
+        unsafe { flex.inner.set_fsel_unchecked(0) };
+        flex
     }
 
-    /// Set the pin's drive strength.
-    #[inline]
-    pub fn set_drive_strength(&mut self, strength: Drive) {
-        // It would be best to merge ds1 and ds0, but currently chiptool does not 
-        // seem to have such a transform?
-        let (ds1, ds0) = match strength {
-            Drive::Drive0 => (false, false),
-            Drive::Drive1 => (false, true),
-            Drive::Drive2 => (true, false),
-            Drive::Drive3 => (true, true),
-        };
-        let pin_id = self.pin.pin();
-        match pin_id {
-            0..=38 => {
-                self.pin.pinmux().pad_pa0_38(pin_id as _).modify(|w| {
-                    w.set_ds0(ds0);
-                    w.set_ds1(ds1);
-                });
-            },
-            39..=42 => {
-                let ds = match strength {
-                    Drive::Drive0 => false,
-                    Drive::Drive1 => true,
-                    _ => {
-                        warn!("PA39-42 can only be set to Drive0 or Drive1");
-                        true
-                    },
-                };
-                self.pin.pinmux().pad_pa39_42((pin_id - 39) as _).modify(|w| {
-                    w.set_ds(ds);
-                });
-            },
-            43..=44 => {
-                self.pin.pinmux().pad_pa43_44((pin_id - 43) as _).modify(|w| {
-                    w.set_ds0(ds0);
-                    w.set_ds1(ds1);
-                });
-            },
-            _ => unreachable!(),
-        } 
-    }
-
-    /// Set the pin's slew rate.
-    #[inline]
-    pub fn set_slew_rate(&mut self, slew_rate: SlewRate) {
-        let sr = match slew_rate {
-            SlewRate::Fast => vals::Sr::Fast,
-            SlewRate::Slow => vals::Sr::Slow,
-        };
-        let pin_id = self.pin.pin();
-        match pin_id {
-            0..=38 => {
-                self.pin.pinmux().pad_pa0_38(pin_id as _).modify(|w| {
-                    w.set_sr(sr);
-                });
-            },
-            39..=42 => {
-                // TODO: should this be a panic?
-                warn!("Cannot set slew rate on pad 39-42");
-            },
-            43..=44 => {
-                self.pin.pinmux().pad_pa43_44((pin_id - 43) as _).modify(|w| {
-                    w.set_sr(sr);
-                });
-            },
-            _ => unreachable!(),
-        }
-    }
-
-    /// Set the pin's Schmitt trigger input.
-    /// if disabled, it will be a CMOS input.
-    #[inline]
-    pub fn set_schmitt(&mut self, enable: bool) {
-        let is = if enable {
-            vals::Is::Schmitt
-        } else {
-            vals::Is::Cmos
-        };
-        let pin_id = self.pin.pin();
-        match pin_id {
-            0..=38 => {
-                self.pin.pinmux().pad_pa0_38(pin_id as _).modify(|w| {
-                    w.set_is(is);
-                });
-            },
-            39..=42 => {
-                self.pin.pinmux().pad_pa39_42((pin_id - 39) as _).modify(|w| {
-                    w.set_is(is);
-                });
-            },
-            43..=44 => {
-                self.pin.pinmux().pad_pa43_44((pin_id - 43) as _).modify(|w| {
-                    w.set_is(is);
-                });
-            },
-            _ => unreachable!(),
-        }
-    }
-
-    /// Put the pin into input mode.
-    ///
-    /// The pull setting is left unchanged.
-    #[inline]
-    pub fn set_as_input(&mut self) {
-        if self.pin.pin() / 32 == 0 {
-            self.pin.gpio().doecr0().write_value(sifli_pac::hpsys_gpio::regs::Doecr0(self.bit()));
-        } else {
-            self.pin.gpio().doecr1().write_value(sifli_pac::hpsys_gpio::regs::Doecr1(self.bit()));
-        }
-    }
-
-    /// Put the pin into output mode.
-    ///
-    /// The pin level will be whatever was set before (or low by default). If you want it to begin
-    /// at a specific level, call `set_high`/`set_low` on the pin first.
-    #[inline]
+    /// Configure pin as output
     pub fn set_as_output(&mut self) {
-        if self.pin.pin() / 32 == 0 {
-            self.pin.gpio().doesr0().write_value(sifli_pac::hpsys_gpio::regs::Doesr0(self.bit()));
-        } else {
-            self.pin.gpio().doesr1().write_value(sifli_pac::hpsys_gpio::regs::Doesr1(self.bit()));
-        }
+        self.inner.set_as_output();
     }
 
-    /// Put the pin into open-drain output mode.
-    ///
-    /// The pin level will be whatever was set before (or low by default). If you want it to begin
-    /// at a specific level, call `set_high`/`set_low` on the pin first.
-    #[inline]
+    /// Configure pin as input
+    pub fn set_as_input(&mut self) {
+        self.inner.set_as_input();
+    }
+    
+    /// Configure pin as open drain output
     pub fn set_as_output_od(&mut self) {
-        if self.pin.pin() / 32 == 0 {
-            self.pin.gpio().iphsr0().write_value(sifli_pac::hpsys_gpio::regs::Iphsr0(self.bit()));
-            self.pin.gpio().iplsr0().write_value(sifli_pac::hpsys_gpio::regs::Iplsr0(self.bit()));
-        } else {
-            self.pin.gpio().iphsr1().write_value(sifli_pac::hpsys_gpio::regs::Iphsr1(self.bit()));
-            self.pin.gpio().iplsr1().write_value(sifli_pac::hpsys_gpio::regs::Iplsr1(self.bit()));
-        }
+        self.inner.set_as_output_od();
     }
 
-    /// Set as output pin.
-    #[inline]
+    /// Returns whether pin is configured as output
     pub fn is_set_as_output(&self) -> bool {
-        let bit = if self.pin.pin() / 32 == 0 {
-            self.pin.gpio().doesr0().read().0
-        } else {
-            self.pin.gpio().doesr1().read().0
-        };
-        (bit & self.bit()) != 0
+        self.inner.is_set_as_output()
     }
 
-    /// Get whether the pin input level is high.
-    #[inline]
-    pub fn is_high(&self) -> bool {
-        !self.is_low()
-    }
-
-    /// Get whether the pin input level is low.
-    #[inline]
-    pub fn is_low(&self) -> bool {
-        let bit = if self.pin.pin() / 32 == 0 {
-            self.pin.gpio().dir0().read().0
-        } else {
-            self.pin.gpio().dir1().read().0
-        };
-        (bit & self.bit()) == 0
-    }
-
-    /// Returns current pin level
-    #[inline]
-    pub fn get_level(&self) -> Level {
-        self.is_high().into()
-    }
-
-    /// Set the output as high.
-    #[inline]
+    /// Set pin level high
     pub fn set_high(&mut self) {
-        if self.pin.pin() / 32 == 0 {
-            self.pin.gpio().dosr0().write_value(sifli_pac::hpsys_gpio::regs::Dosr0(self.bit()));
-        } else {
-            self.pin.gpio().dosr1().write_value(sifli_pac::hpsys_gpio::regs::Dosr1(self.bit()));
-        }
+        self.inner.set_high();
     }
 
-    /// Set the output as low.
-    #[inline]
+    /// Set pin level low 
     pub fn set_low(&mut self) {
-        if self.pin.pin() / 32 == 0 {
-            self.pin.gpio().docr0().write_value(sifli_pac::hpsys_gpio::regs::Docr0(self.bit()));
-        } else {
-            self.pin.gpio().docr1().write_value(sifli_pac::hpsys_gpio::regs::Docr1(self.bit()));
-        }
+        self.inner.set_low();
     }
 
-    /// Set the output level.
-    #[inline]
-    pub fn set_level(&mut self, level: Level) {
-        match level {
-            Level::Low => self.set_low(),
-            Level::High => self.set_high(),
-        }
-    }
-
-    /// Is the output level high?
-    #[inline]
-    pub fn is_set_high(&self) -> bool {
-        !self.is_set_low()
-    }
-
-    /// Is the output level low?
-    #[inline]
-    pub fn is_set_low(&self) -> bool {
-        let bit = if self.pin.pin() / 32 == 0 {
-            self.pin.gpio().dor0().read().0
-        } else {
-            self.pin.gpio().dor1().read().0
-        };
-        (bit & self.bit()) == 0
-    }
-
-    /// What level output is set to
-    #[inline]
-    pub fn get_output_level(&self) -> Level {
-        self.is_set_high().into()
-    }
-
-    /// Toggle pin output
-    #[inline]
+    /// Toggle pin level
     pub fn toggle(&mut self) {
-        self.set_level(!self.get_output_level());
+        self.inner.toggle();
+    }
+
+    /// Get current pin output level
+    pub fn get_output_level(&self) -> Level {
+        self.inner.get_output_level()
+    }
+
+    /// Get current pin level (either input or output depending on mode)
+    pub fn get_level(&self) -> Level {
+        self.inner.get_level()
+    }
+
+    /// Set pin level
+    pub fn set_level(&mut self, level: Level) {
+        self.inner.set_level(level)
+    }
+
+    /// Returns whether pin level is high
+    pub fn is_high(&self) -> bool {
+        self.inner.is_high()
+    }
+
+    /// Returns whether pin level is low
+    pub fn is_low(&self) -> bool {
+        self.inner.is_low()
+    }
+
+    /// Returns whether pin output level is high 
+    pub fn is_set_high(&self) -> bool {
+        self.inner.is_set_high()
+    }
+
+    /// Returns whether pin output level is low
+    pub fn is_set_low(&self) -> bool {
+        self.inner.is_set_low()
+    }
+    
+    /// Set pin pull resistor
+    pub fn set_pull(&mut self, pull: Pull) {
+        self.inner.set_pull(pull);
+    }
+
+    /// Set pin drive strength 
+    pub fn set_drive_strength(&mut self, drive: Drive) {
+        self.inner.set_drive_strength(drive);
+    }
+
+    /// Set pin slew rate
+    pub fn set_slew_rate(&mut self, slew_rate: SlewRate) {
+        self.inner.set_slew_rate(slew_rate);
+    }
+
+    /// Enable schmitt input
+    pub fn set_schmitt(&mut self, enable: bool) {
+        self.inner.set_schmitt(enable);
+    }
+
+    /// Set pin function select and attributes
+    pub fn set_function(&mut self, fsel: u8, af_type: crate::gpio::AfType) {
+        self.inner.set_function(fsel, af_type);
     }
 
     /// Wait until the pin is high. If it is already high, return immediately.
@@ -830,33 +635,23 @@ impl<'d> Flex<'d> {
     pub async fn wait_for_any_edge(&mut self) {
         InputFuture::new(self.pin.reborrow(), InterruptTrigger::AnyEdge).await;
     }
-
-    /// set pinmux fsel
-    pub unsafe fn set_fsel_unchecked(&mut self, fsel: u8) {
-        let pin_id = self.pin.pin();
-        match pin_id {
-            0..=38 => {
-                self.pin.pinmux().pad_pa0_38(pin_id as _).modify(|w| w.set_fsel(fsel));
-            },
-            39..=42 => {
-                self.pin.pinmux().pad_pa39_42((pin_id - 39) as _).modify(|w| w.set_fsel(fsel));
-            },
-            43..=44 => {
-                self.pin.pinmux().pad_pa43_44((pin_id - 43) as _).modify(|w| w.set_fsel(fsel));
-            },
-            _ => unreachable!(),
-        }
-    }
 }
 
 impl<'d> Drop for Flex<'d> {
     #[inline]
     fn drop(&mut self) {
-        // let idx = self.pin._pin() as usize;
-        // self.pin.pad_ctrl().write(|_| {});
-        // self.pin.gpio().ctrl().write(|w| {
-        //     w.set_funcsel(pac::io::vals::Gpio0ctrlFuncsel::NULL as _);
-        // });
+        // TODO
+        self.pin.set_as_disconnected();
+    }
+}
+
+pub(crate) struct AfType {
+    pub(crate) pull: Pull,
+}
+
+impl AfType {
+    pub(crate) fn new(pull: Pull) -> Self {
+        Self { pull }
     }
 }
 
@@ -879,6 +674,22 @@ pub(crate) trait SealedPin: Sized {
 
     fn pinmux(&self) -> pac::hpsys_pinmux::HpsysPinmux {
         pac::HPSYS_PINMUX
+    }
+
+    /// Set the pin as "disconnected", ie doing nothing and consuming the lowest
+    /// amount of power possible.
+    #[inline]
+    fn set_as_disconnected(&self) {
+        let mut pin = HpsysPin::new(self.pin_bank());
+        pin.disable_interrupt();
+        pin.clear_flags();
+        unsafe { pin.set_fsel_unchecked(0) };
+    }
+
+    #[inline]
+    fn set_function(&self, fsel: u8, af_type: AfType) {
+        let mut pin = HpsysPin::new(self.pin_bank());
+        pin.set_function(fsel, af_type);
     }
 }
 
@@ -949,37 +760,6 @@ macro_rules! impl_pin {
         }
     };
 }
-
-impl_pin!(PA0, 0, 0);
-impl_pin!(PA1, 0, 1);
-impl_pin!(PA2, 0, 2);
-impl_pin!(PA3, 0, 3);
-impl_pin!(PA4, 0, 4);
-impl_pin!(PA5, 0, 5);
-impl_pin!(PA6, 0, 6);
-impl_pin!(PA7, 0, 7);
-impl_pin!(PA8, 0, 8);
-impl_pin!(PA9, 0, 9);
-impl_pin!(PA10, 0, 10);
-impl_pin!(PA11, 0, 11);
-impl_pin!(PA12, 0, 12);
-impl_pin!(PA13, 0, 13);
-impl_pin!(PA14, 0, 14);
-impl_pin!(PA15, 0, 15);
-impl_pin!(PA16, 0, 16);
-impl_pin!(PA17, 0, 17);
-impl_pin!(PA18, 0, 18);
-impl_pin!(PA19, 0, 19);
-impl_pin!(PA20, 0, 20);
-impl_pin!(PA21, 0, 21);
-impl_pin!(PA22, 0, 22);
-impl_pin!(PA23, 0, 23);
-impl_pin!(PA24, 0, 24);
-impl_pin!(PA25, 0, 25);
-impl_pin!(PA26, 0, 26);
-impl_pin!(PA27, 0, 27);
-impl_pin!(PA28, 0, 28);
-impl_pin!(PA29, 0, 29);
 
 // ====================
 

@@ -10,11 +10,11 @@ use crate::time::Hertz;
 
 // TODO: should we split this into `RccEnable` and `RccReset` ?
 pub(crate) trait SealedRccEnableReset {
-    fn rcc_enable();
+    fn rcc_enable() {}
 
-    fn rcc_disable();
+    fn rcc_disable() {}
 
-    fn rcc_reset();
+    fn rcc_reset() {}
 }
 #[allow(private_bounds)]
 pub trait RccEnableReset: SealedRccEnableReset + 'static {}

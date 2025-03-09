@@ -1,0 +1,37 @@
+# pinmux_signal: signal in pinmux. e.g. PA00_I2C_UART, LCDC1_8080_DIO6
+
+# Avaliable inserts:
+# peripheral_nomux: 
+#   $peripheral = signal.split("_")[0]
+#     e.g. LCDC1_SPI_RSTB -> LCDC1
+# peripheral_mux:
+#   $peripheral = signal
+#   $cfg_pin = HPSYS.XXXx_PINRx.(.*)
+#     e.g. USART2_PINR.TXD_PIN -> TxdPin
+hcpu:
+  - name: GPIO_A.*
+    # type: default is `peripheral_nomux`
+    type: gpio
+
+  - name: PA.*_I2C_UART
+    type: superimposed
+    # signal also is the HPSYS_CFG fieldsets name
+    # e.g. USART -> USARTx_PINRx
+    signals:
+      - USART
+      - I2C
+  - name: PA.*_TIM
+    type: superimposed
+    signals:
+      - ATIM
+      - GPTIM
+      - LPTIM
+  
+  - name: USART
+    type: peripheral_mux
+    pin_trait:
+      crate::usart::$cfg_pin<$peripheral>
+
+  - name: LCDC1_SPI_RSTB
+    pin_trait:
+      crate::lcdc::SpiRstbPin<$peripheral>
