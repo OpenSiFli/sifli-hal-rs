@@ -1,14 +1,71 @@
-// Some code in this file is copied from [chiptool](https://github.com/embassy-rs/chiptool/blob/main/src/ir.rs)
-// and is used under the MIT License with some simplifications and modifications.  
-// Since [chiptool](https://github.com/embassy-rs/chiptool/) is not published on 
-// [crates.io](https://crates.io), we cannot directly depend on it.
-
 use std::fmt;
 use std::collections::BTreeMap;
 
 use serde::{Deserialize, Deserializer, Serialize};
 use serde::de::{self, Visitor, MapAccess};
 
+// ---------- pinmux_signals.yaml ----------
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct PinmuxSignals {
+    pub hcpu: Vec<SignalDefinition>,
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct SignalDefinition {
+    pub name: String,
+    #[serde(default = "default_peripheral_nomux", skip_serializing_if = "is_peripheral_nomux")]
+    pub r#type: SignalType,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub signals: Vec<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub pin_trait: Option<String>,
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, PartialOrd, Ord, Eq)]
+#[serde(rename_all = "snake_case")]
+pub enum SignalType {
+    Gpio,
+    PeripheralNomux,
+    PeripheralMux,
+    Superimposed,
+}
+
+fn default_peripheral_nomux() -> SignalType {
+    SignalType::PeripheralNomux
+}
+
+fn is_peripheral_nomux(signal_type: &SignalType) -> bool {
+    *signal_type == SignalType::PeripheralNomux
+}
+
+
+// ---------- pinmux.yaml ----------
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct Pinmux {
+    pub hcpu: Vec<PinmuxPin>,
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct PinmuxPin {
+    pub pin: String,
+    pub functions: Vec<PinFunction>,
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct PinFunction {
+    pub function: String,
+    pub value: u8,
+}
+
+
+// ---------- HPSYS_xxx.yaml ----------
+
+// Some code in this file is copied from [chiptool](https://github.com/embassy-rs/chiptool/blob/main/src/ir.rs)
+// and is used under the MIT License with some simplifications and modifications.  
+// Since [chiptool](https://github.com/embassy-rs/chiptool/) is not published on 
+// [crates.io](https://crates.io), we cannot directly depend on it.
 #[derive(Default, Clone, Debug, PartialEq)]
 pub struct IR {
     pub blocks: BTreeMap<String, Block>,
@@ -74,6 +131,9 @@ pub struct Field {
     pub bit_size: u32,
 }
 
+
+// ---------- interrupts.yaml ----------
+
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Interrupts {
     pub hcpu: Vec<Interrupt>,
@@ -86,6 +146,8 @@ pub struct Interrupt {
     pub description: Option<String>,
     pub value: u32,
 }
+
+// ---------- peripherals.yaml ----------
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Peripherals {
